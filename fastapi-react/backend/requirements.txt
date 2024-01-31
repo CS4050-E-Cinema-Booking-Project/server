@@ -1,0 +1,3 @@
+# cat requirements.txt 
+fastapi==0.78.0
+uvicorn==0.17.6
