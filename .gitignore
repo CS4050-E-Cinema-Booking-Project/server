@@ -2,5 +2,5 @@
 *.log
 
 # ignore ALL files in ANY directory named temp
-fastapi-react/frontend/node_modules/
-fastapi-react/backend/venv/lib
+poetry.lock
+
