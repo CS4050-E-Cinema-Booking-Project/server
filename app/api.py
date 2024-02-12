@@ -1,7 +1,37 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+from fastapi import HTTPException, Depends
+from typing import Annotated, List
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from database import SessionLocal, engine
+import models
 
 app = FastAPI()
+
+class MovieBase(BaseModel):
+    id: int
+    name: str
+
+class MovieModel(MovieBase):
+    id: int
+
+    class Config:
+        arbitrary_types_allowed = True
+        orm_mode = True
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+db_dependency = Annotated[Session, Depends(get_db)]
+models.Base.metadata.create_all(bind=engine)
+
 
 origins = [
     "http://localhost:3000",
@@ -32,22 +62,32 @@ app.add_middleware(
 )
 
 # Get Movies (select)
-@app.get("/movie", tags=["movies"])
-async def get_movies() -> dict:
-    return { "data": movies }
+@app.get("/movie", tags=["movies"], response_model=List[MovieModel])
+async def get_movies(db: Session = Depends(get_db), skip: int = 0, limit: int = 100) -> dict:
+    movies = db.query(models.Movie).offset(skip).limit(limit).all()
+    import pdb;pdb.set_trace()
+    return movies
+    #return { "data": movies }
 
 # Post Movies (create new)
-@app.post("/movie", tags=["movies"])
-async def add_movie(movie: dict) -> dict:
-    movies.append(movie)
-    return {
-        "data": { "Movie added." }
-    }
+@app.post("/movie", tags=["movies"], response_model=List[MovieModel])
+async def add_movie(movie: MovieBase, db: Session = Depends(get_db)) -> dict:
+    import pdb;pdb.set_trace()
+    db_movie = models.Movie(**movie.dict())
+    db.add(db_movie)
+    db.commit()
+    db.refresh(db_movie)
+    return db_movie
 
 # Root
 @app.get("/",tags=["root"])
 async def read_root() -> dict:
     return {"message":"Welcome to your movie list."}
+
+
+
+
+
 
 # Put (or update)
 @app.put("/movie/{id}", tags=["movies"])
@@ -76,3 +116,19 @@ async def delete_movie(id: int) -> dict:
     return {
         "data": f"Movie with id {id} not found."
     }
+
+
+@app.post("/movies_db/", response_model=MovieModel)
+async def create_movie(movie: MovieBase, db: Session = Depends(get_db)):
+    db_movie = models.Movie(**movie.dict())
+    db.add(db_movie)
+    db.commit()
+    db.refresh(db_movie)
+    return db_movie
+
+
+
+@app.get("/movies_db/", response_model=List[MovieModel])
+async def read_movies(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
+    movies = db.query(models.Movie).offset(skip).limit(limit).all()
+    return movies
