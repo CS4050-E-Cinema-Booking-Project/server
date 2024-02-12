@@ -62,18 +62,16 @@ app.add_middleware(
 )
 
 # Get Movies (select)
-@app.get("/movie", tags=["movies"], response_model=List[MovieModel])
+@app.get("/movie", tags=["movies"])#, response_model=List[MovieModel])
 async def get_movies(db: Session = Depends(get_db), skip: int = 0, limit: int = 100) -> dict:
     movies = db.query(models.Movie).offset(skip).limit(limit).all()
-    import pdb;pdb.set_trace()
-    return movies
-    #return { "data": movies }
+    movies_data = [{"id":str(x.id),"item":x.name} for x in movies]
+    return { "data": movies_data }
 
 # Post Movies (create new)
-@app.post("/movie", tags=["movies"], response_model=List[MovieModel])
-async def add_movie(movie: MovieBase, db: Session = Depends(get_db)) -> dict:
-    import pdb;pdb.set_trace()
-    db_movie = models.Movie(**movie.dict())
+@app.post("/movie", tags=["movies"])#, response_model=List[MovieModel])
+async def add_movie(movie: dict, db: Session = Depends(get_db)) -> dict:
+    db_movie = models.Movie(id = movie['id'], name = movie['item'])
     db.add(db_movie)
     db.commit()
     db.refresh(db_movie)
