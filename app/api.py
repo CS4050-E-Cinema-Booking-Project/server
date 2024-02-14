@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from fastapi import HTTPException, Depends
 from typing import Annotated, List
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import SessionLocal, engine
@@ -78,6 +77,16 @@ async def add_movie(movie: dict, db: Session = Depends(get_db)) -> dict:
     db.refresh(db_movie)
     return db_movie
 
+# Root
+@app.get("/",tags=["root"])
+async def read_root() -> dict:
+    return {"message":"Welcome to your movie list."}
+
+
+
+
+
+
 # Put (or update)
 @app.put("/movie/{id}", tags=["movies"])
 async def update_movie(id: int, body: dict) -> dict:
@@ -104,12 +113,6 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)) -> dict:
     return {
         "data": f"Movie with id {id} not found."
     }
-    
-
-# Root
-@app.get("/",tags=["root"])
-async def read_root() -> dict:
-    return {"message":"Welcome to your movie list."}
 
 
 @app.post("/movies_db/", response_model=MovieModel)
@@ -120,9 +123,9 @@ async def create_movie(movie: MovieBase, db: Session = Depends(get_db)):
     db.refresh(db_movie)
     return db_movie
 
+
+
 @app.get("/movies_db/", response_model=List[MovieModel])
 async def read_movies(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
     movies = db.query(models.Movie).offset(skip).limit(limit).all()
     return movies
-
-
