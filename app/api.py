@@ -97,6 +97,7 @@ async def update_movie(id: int, body: dict) -> dict:
 async def delete_movie(given_id: int, db: Session = Depends(get_db)) -> dict:
     movie = db.query(models.Movie).filter_by(id=given_id).first()
     if movie is not None:
+        db.delete(movie)
         db.commit()
         return movie
     
