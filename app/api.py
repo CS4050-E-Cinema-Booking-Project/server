@@ -88,17 +88,22 @@ async def read_root() -> dict:
 
 
 # Put (or update)
-@app.put("/movie/{id}", tags=["movies"])
-async def update_movie(id: int, body: dict) -> dict:
-    for movie in movies:
-        if int(movie["id"]) == id:
-            movie["item"] = body["item"]
-            return {
-                "data": f"Movie with id {id} has been updated."
-            }
+@app.put("/movie/{given_id}", tags=["movies"])
+async def update_movie(
+    given_id: int,
+    given_name: str,
+    given_price: float,
+    db: Session = Depends(get_db)) -> dict:
+    movie = db.query(models.Movie).filter_by(id=given_id).first()
+    if movie is not None:
+        movie.name = given_name
+        movie.price = given_price
+        db.commit()
+        db.refresh(movie)
+        return movie
 
     return {
-        "data": f"Movie with id {id} not found."
+        "data": f"Movie with id {given_id} not found."
     }
 
 # Delete
@@ -111,7 +116,7 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)) -> dict:
         return movie
     
     return {
-        "data": f"Movie with id {id} not found."
+        "data": f"Movie with id {given_id} not found."
     }
 
 
