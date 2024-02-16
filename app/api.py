@@ -102,15 +102,14 @@ async def update_movie(id: int, body: dict) -> dict:
     }
 
 # Delete
-@app.delete("/movie/{id}", tags=["movies"])
-async def delete_movie(id: int) -> dict:
-    for movie in movies:
-        if int(movie["id"]) == id:
-            movies.remove(movie)
-            return {
-                "data": f"Movie with id {id} has been removed."
-            }
-
+@app.delete("/movie/{given_id}", tags=["movies"])
+async def delete_movie(given_id: int, db: Session = Depends(get_db)) -> dict:
+    movie = db.query(models.Movie).filter_by(id=given_id).first()
+    if movie is not None:
+        db.delete(movie)
+        db.commit()
+        return movie
+    
     return {
         "data": f"Movie with id {id} not found."
     }
