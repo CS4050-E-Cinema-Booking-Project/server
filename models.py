@@ -6,4 +6,5 @@ class Movie(Base):
     __tablename__ = 'movies'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    item = Column(String)
+    description = Column(String)

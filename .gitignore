@@ -6,3 +6,5 @@ poetry.lock
 movie.db
 
 *.pyc
+movie.db
+*.pyc
