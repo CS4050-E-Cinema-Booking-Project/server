@@ -58,7 +58,34 @@ async def get_movies(db: db_dependency, skip: int = 0, limit: int = 100):
     movies = db.query(models.Movie).offset(skip).limit(limit).all()
     return movies
 
-# Root
-@app.get("/",tags=["root"])
-async def read_root() -> dict:
-    return {"message":"Welcome to your movie list."}
+# Put (or update)
+@app.put("/movie/{given_id}", tags=["movies"])
+async def update_movie(
+    given_id: int,
+    given_name: str,
+    given_price: float,
+    db: Session = Depends(get_db)) -> dict:
+    movie = db.query(models.Movie).filter_by(id=given_id).first()
+    if movie is not None:
+        movie.name = given_name
+        movie.price = given_price
+        db.commit()
+        db.refresh(movie)
+        return movie
+
+    return {
+        "data": f"Movie with id {given_id} not found."
+    }
+
+# Delete
+@app.delete("/movie/{given_id}", tags=["movies"])
+async def delete_movie(given_id: int, db: Session = Depends(get_db)) -> dict:
+    movie = db.query(models.Movie).filter_by(id=given_id).first()
+    if movie is not None:
+        db.delete(movie)
+        db.commit()
+        return movie
+    
+    return {
+        "data": f"Movie with id {given_id} not found."
+    }
