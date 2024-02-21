@@ -23,8 +23,9 @@ app.add_middleware(
 )
 
 class MovieBase(BaseModel):
-    item: str
+    title: str
     description: str
+    image: str
 
 class MovieModel(MovieBase):
     id: int
@@ -59,27 +60,25 @@ async def get_movies(db: db_dependency, skip: int = 0, limit: int = 100):
     return movies
 
 # Put (or update)
-@app.put("/movie/{given_id}", tags=["movies"])
+@app.put("/movies/{given_id}", tags=["movies"])
 async def update_movie(
-    given_id: int,
-    given_name: str,
-    given_price: float,
-    db: Session = Depends(get_db)) -> dict:
-    movie = db.query(models.Movie).filter_by(id=given_id).first()
+    body: dict,
+    db: Session = Depends(get_db)):
+    movie = db.query(models.Movie).filter_by(id=body['given_id']).first()
     if movie is not None:
-        movie.name = given_name
-        movie.price = given_price
+        movie.title = body['given_title']
+        movie.description = body['given_desc']
         db.commit()
         db.refresh(movie)
         return movie
 
     return {
-        "data": f"Movie with id {given_id} not found."
+        "data": f"Movie with id {body['given_id']} not found."
     }
 
 # Delete
-@app.delete("/movie/{given_id}", tags=["movies"])
-async def delete_movie(given_id: int, db: Session = Depends(get_db)) -> dict:
+@app.delete("/movies/{given_id}", tags=["movies"])
+async def delete_movie(given_id: int, db: Session = Depends(get_db)):
     movie = db.query(models.Movie).filter_by(id=given_id).first()
     if movie is not None:
         db.delete(movie)
