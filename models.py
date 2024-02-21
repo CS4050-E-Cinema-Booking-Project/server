@@ -6,4 +6,14 @@ class Movie(Base):
     __tablename__ = 'movies'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    title = Column(String)
+    description = Column(String)
+    image = Column(String)
+
+
+class Theater(Base):
+    __tablename__ = 'theaters'
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    capacity = Column(Integer)
