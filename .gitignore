@@ -3,4 +3,9 @@
 
 # ignore ALL files in ANY directory named temp
 poetry.lock
+movie.db
 
+*.pyc
+movie.db
+*.pyc
+*.pyc
