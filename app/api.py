@@ -27,6 +27,8 @@ class MovieBase(BaseModel):
     description: str
     image: str
     trailer: str
+    director: str
+    genre: str
 
 class MovieModel(MovieBase):
     id: int

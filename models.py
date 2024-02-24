@@ -10,6 +10,8 @@ class Movie(Base):
     description = Column(String)
     image = Column(String)
     trailer = Column(String)
+    director = Column(String)
+    genre = Column(String)
 
 
 class Theater(Base):
