@@ -29,6 +29,7 @@ class MovieBase(BaseModel):
     trailer: str
     director: str
     genre: str
+    releaseDate: str
 
 class MovieModel(MovieBase):
     id: int

@@ -12,6 +12,7 @@ class Movie(Base):
     trailer = Column(String)
     director = Column(String)
     genre = Column(String)
+    releaseDate = Column(String)
 
 
 class User(Base):
