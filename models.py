@@ -12,11 +12,16 @@ class Movie(Base):
     trailer = Column(String)
     director = Column(String)
     genre = Column(String)
+    releaseDate = Column(String)
 
 
-class Theater(Base):
-    __tablename__ = 'theaters'
+class User(Base):
+    __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    capacity = Column(Integer)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    firstName = Column(String)
+    lastName = Column(String)
+    email = Column(String)
+    phoneNumber = Column(String)
+    password = Column(String)
+    confirmPassword = Column(String)
