@@ -26,6 +26,7 @@ class MovieBase(BaseModel):
     title: str
     description: str
     image: str
+    trailer: str
 
 class MovieModel(MovieBase):
     id: int
@@ -57,6 +58,12 @@ async def add_movie(movie: MovieBase, db: db_dependency):
 @app.get("/movies/", response_model=List[MovieModel])
 async def get_movies(db: db_dependency, skip: int = 0, limit: int = 100):
     movies = db.query(models.Movie).offset(skip).limit(limit).all()
+    return movies
+
+# Get Movies (select)
+@app.get("/movies/{given_id}", response_model=List[MovieModel])
+async def get_movies(given_id: int, db: db_dependency, skip: int = 0, limit: int = 100):
+    movies = db.query(models.Movie).filter_by(id=given_id).offset(skip).limit(limit).all()
     return movies
 
 # Put (or update)
