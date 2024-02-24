@@ -37,6 +37,22 @@ class MovieModel(MovieBase):
         arbitrary_types_allowed = True
         orm_mode = True 
 
+class UserBase(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+    phoneNumber: str
+    password: str
+    confirmPassword: str
+
+class UserModel(UserBase):
+    id: int
+
+    class Config:
+        arbitrary_types_allowed = True
+        orm_mode = True 
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -97,3 +113,11 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)):
     return {
         "data": f"Movie with id {given_id} not found."
     }
+# Post Users (create new)
+@app.post("/users/", response_model=UserModel)
+async def add_user(user: UserBase, db: db_dependency):
+    db_user = models.User(**user.dict())
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
