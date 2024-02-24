@@ -11,9 +11,13 @@ class Movie(Base):
     image = Column(String)
 
 
-class Theater(Base):
-    __tablename__ = 'theaters'
+class User(Base):
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    title = Column(String)
-    capacity = Column(Integer)
+    firstName = Column(String)
+    lastName = Column(String)
+    email = Column(String)
+    phoneNumber = Column(String)
+    password = Column(String)
+    confirmPassword = Column(String)
