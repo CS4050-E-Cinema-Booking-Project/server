@@ -74,18 +74,12 @@ async def add_movie(movie: MovieBase, db: db_dependency):
     return db_movie
 
 # Get Movies (select)
-@app.get("/movies/", response_model=List[MovieModel])
-async def get_movies(db: db_dependency, skip: int = 0, limit: int = 100):
-    movies = db.query(models.Movie).offset(skip).limit(limit).all()
-    return movies
-
-# Get Movies (select)
 @app.get("/movies/{given_id}", response_model=List[MovieModel])
 async def get_movies(given_id: int, db: db_dependency, skip: int = 0, limit: int = 100):
     movies = db.query(models.Movie).filter_by(id=given_id).offset(skip).limit(limit).all()
     return movies
 
-# Put (or update)
+# Put (or update) Movie
 @app.put("/movies/{given_id}", tags=["movies"])
 async def update_movie(
     body: dict,
@@ -102,7 +96,7 @@ async def update_movie(
         "data": f"Movie with id {body['given_id']} not found."
     }
 
-# Delete
+# Delete Movie
 @app.delete("/movies/{given_id}", tags=["movies"])
 async def delete_movie(given_id: int, db: Session = Depends(get_db)):
     movie = db.query(models.Movie).filter_by(id=given_id).first()
@@ -114,6 +108,7 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)):
     return {
         "data": f"Movie with id {given_id} not found."
     }
+
 # Post Users (create new)
 @app.post("/users/", response_model=UserModel)
 async def add_user(user: UserBase, db: db_dependency):
