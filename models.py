@@ -30,8 +30,8 @@ class User(Base):
     phoneNumber = Column(String)
     password = Column(String)
     confirmPassword = Column(String)
-    userStatus = Column(Integer)
-    userType = Column(Integer)
+    userStatus = Column(String)
+    userType = Column(String)
     userCode = Column(String)
     
 
