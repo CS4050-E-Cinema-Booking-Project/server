@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, Date, Enum
 
 
 class Movie(Base):
@@ -16,6 +16,7 @@ class Movie(Base):
 
 class UserType(Base):
     __tablename__ = 'userTypes'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     userTypeName = Column(String)
 
@@ -31,10 +32,12 @@ class User(Base):
     confirmPassword = Column(String)
     userStatus = Column(Integer)
     userType = Column(Integer)
+    userCode = Column(String)
     
 
 class PaymentCard(Base):
     __tablename__ = 'paymentCards'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     userID = Column(Integer, ForeignKey(User.id))
     cardNumber = Column(Integer)
@@ -43,6 +46,7 @@ class PaymentCard(Base):
 
 class Cinema(Base):
     __tablename__ = 'cinemas'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
     address = Column(String)
@@ -56,6 +60,7 @@ class Showroom(Base):
 
 class Theater(Base):
     __tablename__ = 'theaters'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     cinemaId = Column(Integer, ForeignKey(Cinema.id))
     capacity = Column(Integer)
@@ -63,29 +68,34 @@ class Theater(Base):
 
 class Show(Base):
     __tablename__ = 'shows'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     movieId = Column(Integer, ForeignKey(Movie.id))
     showroomID = Column(Integer, ForeignKey(Showroom.id))
 
 class Booking(Base):
     __tablename__ = 'bookings'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     showId = Column(Integer, ForeignKey(Show.id))
     userID = Column(Integer, ForeignKey(User.id))
 
 class Ticket(Base):
     __tablename__ = 'tickets'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     TicketType = Column(String)
 
 class BookingTicket(Base):
     __tablename__ = 'bookingsTickets'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     bookingID = Column(Integer, ForeignKey(Cinema.id))
     ticketID = Column(Integer, ForeignKey(Ticket.id))
 
 class Actor(Base):
     __tablename__ = 'actors'
+    
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     firstName = Column(String)
     lastName = Column(String)
@@ -93,9 +103,18 @@ class Actor(Base):
 
 class MovieActor(Base):
     __tablename__ = 'moviesActors'
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     movieID = Column(Integer, ForeignKey(Movie.id))
     actorID = Column(Integer, ForeignKey(Actor.id))
+
+
+class Promotion(Base):
+    __tablename__ = 'promotions'
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    description = Column(String)
+    status = Column(String)
 
 
 
