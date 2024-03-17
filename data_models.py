@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from typing import Annotated, List
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from pydantic.schema import Optional
 from database import SessionLocal, engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,7 +31,7 @@ class UserBase(BaseModel):
     phoneNumber: str
     password: str
     confirmPassword: str
-    userCode: str
+    userCode: Optional[str]
 
 class UserModel(UserBase):
     id: int
