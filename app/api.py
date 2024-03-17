@@ -118,29 +118,37 @@ async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
 async def update_password(user: data_models.UserModel, db: db_dependency):
     userNew = db.query(models.User).filter_by(id=user.id).first()
     if userNew is not None:
-        userNew.password = user.password
-        userNew.confirmPassword = user.confirmPassword
+        if userNew.password != user.password:
+            userNew.password = user.password
+            userNew.confirmPassword = user.confirmPassword
+            subject = "Fossil Flicks Password Reset"
+            body = "Your password has been reset."
+            recipients = [user.email]
+            try:
+                send_email(subject, body, recipients)
+            except:
+                Exception
+
+        # Update non-password elements
+        userNew.firstName = user.firstName
+        userNew.lastName = user.lastName
+        userNew.email = user.email
+        userNew.phoneNumber = user.phoneNumber
+        userNew.userCode = user.userCode
+        userNew.userStatus = user.userStatus
+        userNew.userType = user.userType
+
         db.commit()
         db.refresh(userNew)
-        subject = "Fossil Flicks Password Reset"
-        body = "Your password has been reset."
-        recipients = [user.email]
-        
-        try:
-            send_email(subject, body, recipients)
-        except:
-            Exception
         return userNew
 
     return {
         "data": f"User with id {user.id} not found."
     }
 
-
-
 # Post Users (create new)
 @app.post("/users/resend-email", response_model=data_models.UserModel)
-async def resend_email(user: data_models.UserBase, db: db_dependency):#user_code, user_email):
+async def resend_email(user: data_models.UserBase, db: db_dependency):
     subject = "Fossil Flicks Account Confirmation (Resent)"
     body = "(RESENT EMAIL) Please Enter the following code to confirm your account: \n" + str(user.userCode)
     recipients = [user.email]
@@ -170,6 +178,8 @@ async def reset_password(user: data_models.UserModel, db: db_dependency):#user_c
     db_user = models.User(**user.dict())
     db_user.id = -1 # Fake id so validation doesn't break
     return db_user
+
+
 
 # Get Promotions (select)
 @app.get("/promotions/", response_model=List[data_models.PromotionModel])
