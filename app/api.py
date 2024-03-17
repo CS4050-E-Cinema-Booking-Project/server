@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from database import SessionLocal, engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
-
+import data_models
 
 app = FastAPI()
 
@@ -22,38 +22,6 @@ app.add_middleware(
     allow_headers = ['*']
 )
 
-class MovieBase(BaseModel):
-    title: str
-    description: str
-    image: str
-    trailer: str
-    director: str
-    genre: str
-    releaseDate: str
-
-class MovieModel(MovieBase):
-    id: int
-
-    class Config:
-        arbitrary_types_allowed = True
-        orm_mode = True 
-
-class UserBase(BaseModel):
-    firstName: str
-    lastName: str
-    email: str
-    phoneNumber: str
-    password: str
-    confirmPassword: str
-
-class UserModel(UserBase):
-    id: int
-
-    class Config:
-        arbitrary_types_allowed = True
-        orm_mode = True 
-
-
 def get_db():
     db = SessionLocal()
     try:
@@ -65,16 +33,23 @@ db_dependency = Annotated[Session, Depends(get_db)]
 models.Base.metadata.create_all(bind=engine)
 
 # Post Movies (create new)
-@app.post("/movies/", response_model=MovieModel)
-async def add_movie(movie: MovieBase, db: db_dependency):
+@app.post("/movies/", response_model=data_models.MovieModel)
+async def add_movie(movie: data_models.MovieBase, db: db_dependency):
     db_movie = models.Movie(**movie.dict())
     db.add(db_movie)
     db.commit()
     db.refresh(db_movie)
     return db_movie
 
-# Get Movies (select)
-@app.get("/movies/{given_id}", response_model=List[MovieModel])
+
+# Get All Movies (select)
+@app.get("/movies/", response_model=List[data_models.MovieModel])
+async def get_movies(db: db_dependency, skip: int = 0, limit: int = 100):
+    movies = db.query(models.Movie).offset(skip).limit(limit).all()
+    return movies
+
+# Get Specific Movie (select)
+@app.get("/movies/{given_id}", response_model=List[data_models.MovieModel])
 async def get_movies(given_id: int, db: db_dependency, skip: int = 0, limit: int = 100):
     movies = db.query(models.Movie).filter_by(id=given_id).offset(skip).limit(limit).all()
     return movies
@@ -110,8 +85,8 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)):
     }
 
 # Post Users (create new)
-@app.post("/users/", response_model=UserModel)
-async def add_user(user: UserBase, db: db_dependency):
+@app.post("/users/", response_model=data_models.UserModel)
+async def add_user(user: data_models.UserBase, db: db_dependency):
     db_user = models.User(**user.dict())
     db.add(db_user)
     db.commit()
@@ -119,7 +94,15 @@ async def add_user(user: UserBase, db: db_dependency):
     return db_user
 
 # Get Users (select)
-@app.get("/users/", response_model=List[UserModel])
+@app.get("/users/", response_model=List[data_models.UserModel])
 async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
     users = db.query(models.User).offset(skip).limit(limit).all()
     return users
+
+
+
+# Get Promotions (select)
+@app.get("/promotions/", response_model=List[data_models.PromotionModel])
+async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
+    promotions = db.query(models.Promotion).offset(skip).limit(limit).all()
+    return promotions
