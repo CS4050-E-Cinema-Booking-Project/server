@@ -87,18 +87,20 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)):
     }
 
 # Post Users (create new)
-@app.post("/users/resend-email")
-async def resend_email(user: data_models.UserBase):#user_code, user_email):
-    import pdb;pdb.set_trace()
-    subject = "Fossil Flicks Account Confirmation"
-    body = "(RESENT EMAIL) Please Enter the following code to confirm your account: \n" + str(user_code)
-    recipients = [user_email]
+@app.post("/users/resend-email", response_model=data_models.UserModel)
+async def resend_email(user: data_models.UserBase, db: db_dependency):#user_code, user_email):
+    subject = "Fossil Flicks Account Confirmation (Resent)"
+    body = "(RESENT EMAIL) Please Enter the following code to confirm your account: \n" + str(user.userCode)
+    recipients = [user.email]
     
     try:
         send_email(subject, body, recipients)
         print("Email Resent")
     except:
         Exception
+    db_user = models.User(**user.dict())
+    db_user.id = -1 # Fake id so validation doesn't break
+    return db_user
 
 
 # Post Users (create new)
