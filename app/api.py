@@ -86,6 +86,20 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)):
         "data": f"Movie with id {given_id} not found."
     }
 
+# Post Users (create new)
+@app.post("/users/resend-email")
+async def resend_email(user: data_models.UserBase):#user_code, user_email):
+    import pdb;pdb.set_trace()
+    subject = "Fossil Flicks Account Confirmation"
+    body = "(RESENT EMAIL) Please Enter the following code to confirm your account: \n" + str(user_code)
+    recipients = [user_email]
+    
+    try:
+        send_email(subject, body, recipients)
+        print("Email Resent")
+    except:
+        Exception
+
 
 # Post Users (create new)
 @app.post("/users/", response_model=data_models.UserModel)
