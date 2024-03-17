@@ -32,6 +32,8 @@ class UserBase(BaseModel):
     password: str
     confirmPassword: str
     userCode: Optional[str]
+    userStatus: Optional[str]
+    userType: Optional[str]
 
 class UserModel(UserBase):
     id: int
