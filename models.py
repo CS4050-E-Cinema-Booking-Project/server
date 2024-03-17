@@ -32,6 +32,7 @@ class User(Base):
     confirmPassword = Column(String)
     userStatus = Column(Integer)
     userType = Column(Integer)
+    userCode = Column(Integer)
     
 
 class PaymentCard(Base):

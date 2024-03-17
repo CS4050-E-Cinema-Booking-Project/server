@@ -30,6 +30,7 @@ class UserBase(BaseModel):
     phoneNumber: str
     password: str
     confirmPassword: str
+    userCode: str
 
 class UserModel(UserBase):
     id: int
