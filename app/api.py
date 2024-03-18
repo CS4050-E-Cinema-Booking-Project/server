@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import data_models
 from app.utils.send_email import send_email
 from random import randint
+import base64
 
 app = FastAPI()
 
@@ -99,6 +100,8 @@ async def add_user(user: data_models.UserBase, db: db_dependency):
         send_email(subject, body, recipients)
     except:
         Exception
+    encodedPassword = base64.b64encode(user.dict()['password'].encode()).decode()
+    user.dict()['password'] = encodedPassword
     db_user = models.User(**user.dict())
     db_user.userCode = userCode
     db.add(db_user)
