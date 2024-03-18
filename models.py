@@ -30,10 +30,13 @@ class User(Base):
     phoneNumber = Column(String)
     password = Column(String)
     confirmPassword = Column(String)
+    streetAddress = Column(String)
+    city = Column(String)
+    state = Column(String)
+    zipCode = Column(String)
     userStatus = Column(String)
     userType = Column(String)
     userCode = Column(String)
-    
 
 class PaymentCard(Base):
     __tablename__ = 'paymentCards'

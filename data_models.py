@@ -31,6 +31,10 @@ class UserBase(BaseModel):
     phoneNumber: str
     password: str
     confirmPassword: str
+    streetAddress: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    zipCode: Optional[str]
     userCode: Optional[str]
     userStatus: Optional[str]
     userType: Optional[str]

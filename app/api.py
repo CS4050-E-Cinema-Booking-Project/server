@@ -134,6 +134,10 @@ async def update_password(user: data_models.UserModel, db: db_dependency):
         userNew.lastName = user.lastName
         userNew.email = user.email
         userNew.phoneNumber = user.phoneNumber
+        userNew.streetAddress = user.streetAddress
+        userNew.city = user.city
+        userNew.state = user.state
+        userNew.zipCode = user.zipCode
         userNew.userCode = user.userCode
         userNew.userStatus = user.userStatus
         userNew.userType = user.userType
