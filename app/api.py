@@ -88,7 +88,7 @@ async def delete_movie(given_id: int, db: Session = Depends(get_db)):
 
 
 # Post Users (create new)
-@app.post("/users/", response_model=data_models.UserModel)
+@app.post("/users/send-confirmation-email", response_model=data_models.UserModel)
 async def add_user(user: data_models.UserBase, db: db_dependency):
     subject = "Fossil Flicks Account Confirmation"
     userCode = str(randint(10000,99999))
@@ -101,6 +101,13 @@ async def add_user(user: data_models.UserBase, db: db_dependency):
         Exception
     db_user = models.User(**user.dict())
     db_user.userCode = userCode
+    db_user.id = -1
+    return db_user
+
+# Post Users (create new)
+@app.post("/users/", response_model=data_models.UserModel)
+async def add_user(user: data_models.UserBase, db: db_dependency):
+    db_user = models.User(**user.dict())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -191,3 +198,52 @@ async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
     promotions = db.query(models.Promotion).offset(skip).limit(limit).all()
     return promotions
 
+
+# Post Users (create new)
+@app.post("/paymentCards/", response_model=data_models.PaymentCardModel)
+async def add_card(card: data_models.PaymentCardBase, db: db_dependency):
+    db_card = models.PaymentCard(**card.dict())
+    db.add(db_card)
+    db.commit()
+    db.refresh(db_card)
+    return db_card
+
+# Post Users (create new)
+@app.get("/paymentCards/", response_model=List[data_models.PaymentCardModel])
+async def get_cards(db: db_dependency, skip: int = 0, limit: int = 100):
+    cards = db.query(models.PaymentCard).offset(skip).limit(limit).all()
+    return cards
+
+# Get Users (select)
+@app.get("/paymentCards/{given_id}", response_model=data_models.PaymentCardModel)
+async def get_payment_info(given_id: int, db: db_dependency, skip: int = 0, limit: int = 100):
+    card = db.query(models.PaymentCard).filter_by(userID=given_id).first()
+    if card is not None:
+        return card
+    else:
+        return {"data": f"User with id {given_id} not found."}
+
+
+# Put (or update) User Password
+@app.put("/paymentCards/{given_id}", tags=["paymentCards"])
+async def update_card(card: data_models.PaymentCardModel, db: db_dependency):
+    cardNew = db.query(models.PaymentCard).filter_by(id=card.id).first()
+    if cardNew is not None:
+        # Update non-password elements
+        cardNew.cardNumber = card.cardNumber
+        cardNew.expirationDate = card.expirationDate
+        cardNew.cvc = card.cvc
+        cardNew.firstName = card.firstName
+        cardNew.lastName = card.lastName
+        cardNew.streetAddress = card.streetAddress
+        cardNew.city = card.city
+        cardNew.state = card.state
+        cardNew.zipCode = card.zipCode
+
+        db.commit()
+        db.refresh(cardNew)
+        return cardNew
+
+    return {
+        "data": f"User with id {card.id} not found."
+    }

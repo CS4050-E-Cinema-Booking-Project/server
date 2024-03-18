@@ -38,6 +38,7 @@ class UserBase(BaseModel):
     userCode: Optional[str]
     userStatus: Optional[str]
     userType: Optional[str]
+    promotionOptIn: Optional[str]
 
 class UserModel(UserBase):
     id: int
@@ -51,6 +52,26 @@ class PromotionBase(BaseModel):
     status = str
 
 class PromotionModel(UserBase):
+    id: int
+
+    class Config:
+        arbitrary_types_allowed = True
+        orm_mode = True 
+
+
+class PaymentCardBase(BaseModel):
+    userID: Optional[str]
+    cardNumber: Optional[str]
+    expirationDate: Optional[str]
+    cvc: Optional[str]
+    firstName: Optional[str]
+    lastName: Optional[str]
+    streetAddress: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    zipCode: Optional[str]
+
+class PaymentCardModel(PaymentCardBase):
     id: int
 
     class Config:

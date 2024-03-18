@@ -37,15 +37,22 @@ class User(Base):
     userStatus = Column(String)
     userType = Column(String)
     userCode = Column(String)
+    promotionOptIn = Column(String)
 
 class PaymentCard(Base):
     __tablename__ = 'paymentCards'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     userID = Column(Integer, ForeignKey(User.id))
-    cardNumber = Column(Integer)
-    expirationDate = Column(Date)
-    billingAddress = Column(Date)
+    cardNumber = Column(String)
+    expirationDate = Column(String)
+    cvc = Column(String)
+    firstName = Column(String)
+    lastName = Column(String)
+    streetAddress = Column(String)
+    city = Column(String)
+    state = Column(String)
+    zipCode = Column(String)
 
 class Cinema(Base):
     __tablename__ = 'cinemas'
