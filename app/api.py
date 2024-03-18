@@ -154,7 +154,7 @@ async def update_password(user: data_models.UserModel, db: db_dependency):
         # Update non-password elements
         if (userNew.firstName != user.firstName or userNew.lastName != user.lastName or userNew.email != user.email or userNew.phoneNumber != user.phoneNumber
             or userNew.streetAddress != user.streetAddress or userNew.city != user.city or userNew.state != user.state or userNew.zipCode != user.zipCode
-            or userNew.userCode != user.userCode or userNew.userStatus != user.userStatus or userNew.userType != user.userType):
+            or userNew.userCode != user.userCode or userNew.userStatus != user.userStatus or userNew.userType != user.userType or userNew.promotionOptIn != user.promotionOptIn):
             userNew.firstName = user.firstName
             userNew.lastName = user.lastName
             userNew.email = user.email
@@ -166,6 +166,8 @@ async def update_password(user: data_models.UserModel, db: db_dependency):
             userNew.userCode = user.userCode
             userNew.userStatus = user.userStatus
             userNew.userType = user.userType
+            userNew.promotionOptIn = user.promotionOptIn
+
             subject = "Fossil Flicks Account Information Changed"
             body = "Your Account Information has been changed."
             recipients = [user.email]
