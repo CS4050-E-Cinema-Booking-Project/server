@@ -38,6 +38,7 @@ class User(Base):
     userType = Column(String)
     userCode = Column(String)
     promotionOptIn = Column(String)
+    key = Column(String)
 
 class PaymentCard(Base):
     __tablename__ = 'paymentCards'
@@ -53,6 +54,7 @@ class PaymentCard(Base):
     city = Column(String)
     state = Column(String)
     zipCode = Column(String)
+    key = Column(String)
 
 class Cinema(Base):
     __tablename__ = 'cinemas'

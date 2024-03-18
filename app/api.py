@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import data_models
 from app.utils.send_email import send_email
 from random import randint
+from cryptography.fernet import Fernet
 
 app = FastAPI()
 
@@ -108,6 +109,11 @@ async def add_user(user: data_models.UserBase, db: db_dependency):
 @app.post("/users/", response_model=data_models.UserModel)
 async def add_user(user: data_models.UserBase, db: db_dependency):
     db_user = models.User(**user.dict())
+    key = Fernet.generate_key() #this is your "password"
+    cipher_suite = Fernet(key)
+    db_user.password = cipher_suite.encrypt(bytes(db_user.password.encode()))
+    db_user.confirmPassword = cipher_suite.encrypt(bytes(db_user.confirmPassword.encode()))
+    db_user.key = key
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -117,17 +123,25 @@ async def add_user(user: data_models.UserBase, db: db_dependency):
 # Get Users (select)
 @app.get("/users/", response_model=List[data_models.UserModel])
 async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
-    users = db.query(models.User).offset(skip).limit(limit).all()
+    users = db.query(models.User).offset(skip).limit(limit).all()    
+    for user in users:
+        cipher_suite = Fernet(user.key)
+        user.password = cipher_suite.decrypt(user.password)
     return users
 
 # Put (or update) User Password
 @app.put("/users/{given_id}", tags=["users"])
 async def update_password(user: data_models.UserModel, db: db_dependency):
     userNew = db.query(models.User).filter_by(id=user.id).first()
+    cipher_suite = Fernet(userNew.key)
+    userNew.password = cipher_suite.decrypt(userNew.password)
     if userNew is not None:
         if userNew.password != user.password:
-            userNew.password = user.password
-            userNew.confirmPassword = user.confirmPassword
+            key = Fernet.generate_key() #this is your "password"
+            cipher_suite = Fernet(key)
+            userNew.password = cipher_suite.encrypt(bytes(user.password.encode()))
+            userNew.confirmPassword = cipher_suite.encrypt(bytes(user.confirmPassword.encode()))
+            userNew.key = key
             subject = "Fossil Flicks Password Reset"
             body = "Your password has been reset."
             recipients = [user.email]
@@ -205,7 +219,7 @@ async def reset_password(user: data_models.UserModel, db: db_dependency):#user_c
 
 # Get Promotions (select)
 @app.get("/promotions/", response_model=List[data_models.PromotionModel])
-async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
+async def get_promotions(db: db_dependency, skip: int = 0, limit: int = 100):
     promotions = db.query(models.Promotion).offset(skip).limit(limit).all()
     return promotions
 
@@ -213,6 +227,12 @@ async def get_users(db: db_dependency, skip: int = 0, limit: int = 100):
 # Post Users (create new)
 @app.post("/paymentCards/", response_model=data_models.PaymentCardModel)
 async def add_card(card: data_models.PaymentCardBase, db: db_dependency):
+    key = Fernet.generate_key() #this is your "password"
+    cipher_suite = Fernet(key)
+    for value in card:
+        if value[1] is not None:
+            setattr(card, value[0], cipher_suite.encrypt(value[1].encode()))
+    card.key = key
     db_card = models.PaymentCard(**card.dict())
     db.add(db_card)
     db.commit()
@@ -223,6 +243,19 @@ async def add_card(card: data_models.PaymentCardBase, db: db_dependency):
 @app.get("/paymentCards/", response_model=List[data_models.PaymentCardModel])
 async def get_cards(db: db_dependency, skip: int = 0, limit: int = 100):
     cards = db.query(models.PaymentCard).offset(skip).limit(limit).all()
+    for card in cards:
+        cipher_suite = Fernet(card.key)
+        card.userID = cipher_suite.decrypt(card.userID)
+        card.cardNumber = cipher_suite.decrypt(card.cardNumber)
+        card.expirationDate = cipher_suite.decrypt(card.expirationDate)
+        card.cvc = cipher_suite.decrypt(card.cvc)
+        card.firstName = cipher_suite.decrypt(card.firstName)
+        card.lastName = cipher_suite.decrypt(card.lastName)
+        card.streetAddress = cipher_suite.decrypt(card.streetAddress)
+        card.city = cipher_suite.decrypt(card.city)
+        card.state = cipher_suite.decrypt(card.state)
+        card.zipCode = cipher_suite.decrypt(card.zipCode)
+        
     return cards
 
 # Get Users (select)
@@ -242,15 +275,18 @@ async def update_card(card: data_models.PaymentCardModel, db: db_dependency):
     user = db.query(models.User).filter_by(id=card.userID).first()
     if cardNew is not None:
         # Update non-password elements
-        cardNew.cardNumber = card.cardNumber
-        cardNew.expirationDate = card.expirationDate
-        cardNew.cvc = card.cvc
-        cardNew.firstName = card.firstName
-        cardNew.lastName = card.lastName
-        cardNew.streetAddress = card.streetAddress
-        cardNew.city = card.city
-        cardNew.state = card.state
-        cardNew.zipCode = card.zipCode
+        key = cardNew.key
+        cipher_suite = Fernet(key)
+        cardNew.cardNumber = cipher_suite.encrypt(card.cardNumber.encode())
+        cardNew.expirationDate = cipher_suite.encrypt(card.expirationDate.encode())
+        cardNew.cvc = cipher_suite.encrypt(card.cvc.encode())
+        cardNew.firstName = cipher_suite.encrypt(card.firstName.encode())
+        cardNew.lastName = cipher_suite.encrypt(card.lastName.encode())
+        cardNew.streetAddress = cipher_suite.encrypt(card.streetAddress.encode())
+        cardNew.city = cipher_suite.encrypt(card.city.encode())
+        cardNew.state = cipher_suite.encrypt(card.state.encode())
+        cardNew.zipCode = cipher_suite.encrypt(card.zipCode.encode())
+
         subject = "Fossil Flicks Account Billing Information Changed"
         body = "Your Account Billing Information has been changed."
         recipients = [user.email]

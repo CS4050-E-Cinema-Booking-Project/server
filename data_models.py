@@ -39,6 +39,7 @@ class UserBase(BaseModel):
     userStatus: Optional[str]
     userType: Optional[str]
     promotionOptIn: Optional[str]
+    key: Optional[str]
 
 class UserModel(UserBase):
     id: int
@@ -70,6 +71,7 @@ class PaymentCardBase(BaseModel):
     city: Optional[str]
     state: Optional[str]
     zipCode: Optional[str]
+    key: Optional[str]
 
 class PaymentCardModel(PaymentCardBase):
     id: int
