@@ -136,18 +136,29 @@ async def update_password(user: data_models.UserModel, db: db_dependency):
             except:
                 Exception
 
+        flag = False
         # Update non-password elements
-        userNew.firstName = user.firstName
-        userNew.lastName = user.lastName
-        userNew.email = user.email
-        userNew.phoneNumber = user.phoneNumber
-        userNew.streetAddress = user.streetAddress
-        userNew.city = user.city
-        userNew.state = user.state
-        userNew.zipCode = user.zipCode
-        userNew.userCode = user.userCode
-        userNew.userStatus = user.userStatus
-        userNew.userType = user.userType
+        if (userNew.firstName != user.firstName or userNew.lastName != user.lastName or userNew.email != user.email or userNew.phoneNumber != user.phoneNumber
+            or userNew.streetAddress != user.streetAddress or userNew.city != user.city or userNew.state != user.state or userNew.zipCode != user.zipCode
+            or userNew.userCode != user.userCode or userNew.userStatus != user.userStatus or userNew.userType != user.userType):
+            userNew.firstName = user.firstName
+            userNew.lastName = user.lastName
+            userNew.email = user.email
+            userNew.phoneNumber = user.phoneNumber
+            userNew.streetAddress = user.streetAddress
+            userNew.city = user.city
+            userNew.state = user.state
+            userNew.zipCode = user.zipCode
+            userNew.userCode = user.userCode
+            userNew.userStatus = user.userStatus
+            userNew.userType = user.userType
+            subject = "Fossil Flicks Account Information Changed"
+            body = "Your Account Information has been changed."
+            recipients = [user.email]
+            try:
+                send_email(subject, body, recipients)
+            except:
+                Exception
 
         db.commit()
         db.refresh(userNew)
@@ -228,6 +239,7 @@ async def get_payment_info(given_id: int, db: db_dependency, skip: int = 0, limi
 @app.put("/paymentCards/{given_id}", tags=["paymentCards"])
 async def update_card(card: data_models.PaymentCardModel, db: db_dependency):
     cardNew = db.query(models.PaymentCard).filter_by(id=card.id).first()
+    user = db.query(models.User).filter_by(id=card.userID).first()
     if cardNew is not None:
         # Update non-password elements
         cardNew.cardNumber = card.cardNumber
@@ -239,6 +251,13 @@ async def update_card(card: data_models.PaymentCardModel, db: db_dependency):
         cardNew.city = card.city
         cardNew.state = card.state
         cardNew.zipCode = card.zipCode
+        subject = "Fossil Flicks Account Billing Information Changed"
+        body = "Your Account Billing Information has been changed."
+        recipients = [user.email]
+        try:
+            send_email(subject, body, recipients)
+        except:
+            Exception
 
         db.commit()
         db.refresh(cardNew)
